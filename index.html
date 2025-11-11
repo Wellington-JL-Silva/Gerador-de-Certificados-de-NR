@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Certificados de NR</title>
     <style>
-        /* [BLOCO 01] ESTILO GERAL E PAINEL DE CONTROLE (Sem alterações) */
+        /* [BLOCO 01] ESTILO GERAL E PAINEL DE CONTROLE */
         
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Merriweather:wght@400;700&family=Great+Vibes&display=swap');
 
@@ -298,7 +298,8 @@
             display: block;
             font-weight: 700;
             margin-top: 5px;
-            font-size: 11pt;
+            /* [MODIFICAÇÃO] Aumento da fonte para legibilidade */
+            font-size: 13pt; 
             font-family: var(--font-script);
         }
         
@@ -309,7 +310,7 @@
             font-family: var(--font-body);
         }
         
-        /* [MODIFICAÇÃO] [BLOCO 03] ESTILO DO VERSO (Atualizado) */
+        /* [BLOCO 03] ESTILO DO VERSO */
         #cert-verso {
             padding: 1.5cm;
         }
@@ -317,8 +318,7 @@
         #cert-verso .cert-content {
              padding: 0 1cm;
         }
-
-        /* [MODIFICAÇÃO] Estilo para o cabeçalho espelhado no verso */
+        
         .cert-header-verso {
             text-align: center;
             font-size: 8pt;
@@ -364,7 +364,7 @@
             margin-top: 0;
         }
         
-        .program-content ul li ul { /* Sub-lista */
+        .program-content ul li ul {
              list-style-type: circle;
              margin-top: 2px;
              margin-bottom: 5px;
@@ -377,24 +377,28 @@
             text-align: justify;
         }
         
-        /* [MODIFICAÇÃO] Estilo para as imagens espelhadas no verso */
+        /* [MODIFICAÇÃO] Estilo para a assinatura no verso */
+        .cert-signature-verso {
+            margin-top: 15px; /* Espaço entre o conteúdo e a assinatura */
+        }
+        
         .cert-verso-images {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 15px; /* Espaço acima */
-            padding: 10px 1cm; /* Alinha com o conteúdo */
+            margin-top: 15px;
+            padding: 10px 1cm;
             border-top: 1px solid var(--color-border);
         }
         
         .cert-verso-images img {
-            max-height: 50px; /* Menor que na frente */
+            max-height: 50px;
             max-width: 130px;
             object-fit: contain;
-            opacity: 0.7; /* Sutil */
+            opacity: 0.7;
         }
 
-        /* [MODIFICAÇÃO] [BLOCO 04] CSS DE IMPRESSÃO (Campos Transparentes) */
+        /* [BLOCO 04] CSS DE IMPRESSÃO */
         
         @page {
             size: A4 landscape;
@@ -430,10 +434,6 @@
                 padding: 1.5cm;
             }
             
-            /* [MODIFICAÇÃO CRÍTICA]
-             * Força todos os elementos a terem fundo transparente,
-             * impedindo a criação de caixas brancas sobre a marca d'água.
-             */
             body, p, span, li, h1, h2, h3, h4, h5, strong, div, img {
                 color: #000 !important;
                 background-color: transparent !important;
@@ -618,6 +618,17 @@
                 <div class="program-content" id="cert-program-content">
                     </div>
 
+                <div class="cert-signature-verso">
+                    <div class="signature-block" style="width: 60%; margin: 20px auto 0 auto;">
+                        <div class="signature-content-wrapper">
+                            <div class="signature-text">
+                                <span class="name" id="cert-student-name-sig-verso">NOME COMPLETO DO ALUNO</span>
+                                <span class="qual">Aluno</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="cert-verso-images">
                     <img id="cert-logo-verso" src="" alt="Logo da Empresa">
                     <img id="cert-seal-verso" src="" alt="Selo de Autenticidade">
@@ -630,13 +641,10 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             /*
-             * [MODIFICAÇÃO] [BLOCO 01] BASE DE DADOS DAS NORMAS (NR_DATA)
-             *
-             * O conteúdo programático foi "generosamente" enriquecido
-             * conforme solicitado, para melhor atender a cada norma.
+             * [BLOCO 01] BASE DE DADOS DAS NORMAS (NR_DATA)
+             * (Conteúdo programático enriquecido - Sem alterações nesta etapa)
             */
             const NR_DATA = {
-                // --- NR 33 (Espaço Confinado) ---
                 "NR33": {
                     title: "NR 33 - Segurança e Saúde nos Trabalhos em Espaços Confinados",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 33 (Anexo II)",
@@ -649,7 +657,6 @@
                     programContentHTML: (hours, optionText) => {
                         const isSupervisor = optionText.includes('Supervisor');
                         const supervisorContentDisplay = isSupervisor ? 'block' : 'none';
-
                         return `
                             <div>
                                 <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
@@ -703,7 +710,6 @@
                         `;
                     }
                 },
-                // --- NR 35 (Trabalho em Altura) ---
                 "NR35": {
                     title: "NR 35 - Trabalho em Altura",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 35 (Anexo I)",
@@ -750,7 +756,6 @@
                         `;
                     }
                 },
-                // --- NR 01 (GRO/PGR) ---
                 "NR01": {
                     title: "NR 01 - Disposições Gerais e Gerenciamento de Riscos",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 01 (GRO/PGR)",
@@ -796,7 +801,6 @@
                         `;
                     }
                 },
-                // --- NR 06 (EPI) ---
                 "NR06": {
                     title: "NR 06 - Equipamento de Proteção Individual (EPI)",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 06",
@@ -829,7 +833,6 @@
                         `;
                     }
                 },
-                // --- NR 11 (Movimentação - Empilhadeira) ---
                 "NR11_EMP": {
                     title: "NR 11 - Operação de Empilhadeira",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 11 (Anexo I)",
@@ -869,7 +872,6 @@
                         `;
                     }
                 },
-                // --- NR 12 (Máquinas e Equipamentos) ---
                 "NR12": {
                     title: "NR 12 - Segurança no Trabalho em Máquinas e Equipamentos",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 12",
@@ -910,7 +912,6 @@
                         `;
                     }
                 },
-                // --- NR 18 (Construção Civil) ---
                 "NR18": {
                     title: "NR 18 - Segurança e Saúde na Indústria da Construção",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 18",
@@ -978,7 +979,6 @@
                         `;
                     }
                 },
-                // --- NR 20 (Inflamáveis e Combustíveis) ---
                 "NR20": {
                     title: "NR 20 - Segurança e Saúde com Inflamáveis e Combustíveis",
                     programTitle: "CONTEÚDO PROGRAMÁTICO - NR 20 (Anexo II)",
@@ -1022,8 +1022,7 @@
             };
 
             /*
-             * [MODIFICAÇÃO] [BLOCO 02] MAPEAMENTO DE DOM
-             * Adicionados os novos outputs para o verso.
+             * [BLOCO 02] MAPEAMENTO DE DOM
             */
             const elements = {
                 inputs: {
@@ -1052,13 +1051,15 @@
                     companyCnpjBack: document.getElementById('cert-company-cnpj-back'),
                     companyAddressBack: document.getElementById('cert-company-address-back'),
                     companyLogo: document.getElementById('cert-logo'),
-                    companyLogoVerso: document.getElementById('cert-logo-verso'), // Novo
+                    companyLogoVerso: document.getElementById('cert-logo-verso'),
                     watermarkFrente: document.getElementById('cert-watermark-frente'),
                     watermarkVerso: document.getElementById('cert-watermark-verso'),
                     seal: document.getElementById('cert-seal'),
-                    sealVerso: document.getElementById('cert-seal-verso'), // Novo
+                    sealVerso: document.getElementById('cert-seal-verso'),
                     studentName: document.getElementById('cert-student-name'),
                     studentNameSig: document.getElementById('cert-student-name-sig'),
+                    // [MODIFICAÇÃO] Mapeamento do novo campo de assinatura
+                    studentNameSigVerso: document.getElementById('cert-student-name-sig-verso'),
                     studentDoc: document.getElementById('cert-student-doc'),
                     courseName: document.getElementById('cert-course-name'),
                     courseType: document.getElementById('cert-course-type'),
@@ -1083,21 +1084,18 @@
              * [BLOCO 03] FUNÇÕES DE UTILIDADE (Formatação e Imagem)
             */
             
-            // Formata data AAAA-MM-DD para DD/MM/AAAA
             const formatDate = (dateString) => {
                 if (!dateString) return 'DD/MM/AAAA';
                 const [year, month, day] = dateString.split('-');
                 return `${day}/${month}/${year}`;
             };
-
-            // [MODIFICAÇÃO] Formata data AAAA-MM-DD para DD-MM-AA (para o nome do arquivo)
-             const formatDateShort = (dateString) => {
+             
+            const formatDateShort = (dateString) => {
                 if (!dateString) return 'DD-MM-AA';
                 const [year, month, day] = dateString.split('-');
-                return `${day}-${month}-${year.slice(-2)}`; // Pega só os 2 últimos dígitos do ano
+                return `${day}-${month}-${year.slice(-2)}`;
             };
             
-            // Formata data AAAA-MM-DD para "DD de [Mês] de AAAA"
             const formatDateExtended = (dateString) => {
                 if (!dateString) return 'Data de Emissão';
                 const date = new Date(`${dateString}T12:00:00`); 
@@ -1105,14 +1103,12 @@
                 return date.toLocaleDateString('pt-BR', options);
             };
 
-            // [MODIFICAÇÃO] Função de carregar imagem (genérica, aceita MÚLTIPLOS alvos)
             const loadImages = (event, targetElements) => {
                 const file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const imageUrl = e.target.result;
-                        // Itera sobre todos os elementos-alvo e define o src
                         targetElements.forEach(element => {
                             if (element) {
                                 element.src = imageUrl;
@@ -1128,13 +1124,10 @@
              * [BLOCO 04] FUNÇÕES DE PREENCHIMENTO DINÂMICO
             */
             
-            // Preenche o <select> de NORMAS (NR 33, NR 35, etc.)
             const populateNrSelect = () => {
                 const { inputs } = elements;
                 const nrKeys = Object.keys(NR_DATA); 
-                
                 inputs.selectNr.innerHTML = ''; 
-                
                 nrKeys.forEach(key => {
                     const option = document.createElement('option');
                     option.value = key;
@@ -1143,14 +1136,11 @@
                 });
             };
 
-            // Preenche o <select> de TIPO DE CURSO (Trabalhador, Supervisor, etc.)
             const updateCourseOptions = () => {
                 const { inputs } = elements;
                 const selectedNrKey = inputs.selectNr.value;
                 const nrInfo = NR_DATA[selectedNrKey];
-
                 inputs.courseType.innerHTML = ''; 
-                
                 if (nrInfo && nrInfo.options) {
                     nrInfo.options.forEach(courseOption => {
                         const option = document.createElement('option');
@@ -1160,8 +1150,7 @@
                         inputs.courseType.appendChild(option);
                     });
                 }
-                
-                syncCertificateData(); // Sincroniza ao mudar a NR
+                syncCertificateData();
             };
 
             
@@ -1175,14 +1164,16 @@
                 const companyName = inputs.companyName.value;
                 outputs.companyName.innerText = companyName;
                 outputs.companyNameBody.innerText = companyName;
-                outputs.companyNameBack.innerText = companyName; // Atualiza cabeçalho do verso
-                outputs.companyCnpjBack.innerText = inputs.companyCnpj.value; // Atualiza cabeçalho do verso
-                outputs.companyAddressBack.innerText = inputs.companyAddress.value; // Atualiza cabeçalho do verso
+                outputs.companyNameBack.innerText = companyName;
+                outputs.companyCnpjBack.innerText = inputs.companyCnpj.value;
+                outputs.companyAddressBack.innerText = inputs.companyAddress.value;
                                 
                 // --- 2. Dados do Aluno ---
                 const studentName = inputs.studentName.value;
                 outputs.studentName.innerText = studentName;
                 outputs.studentNameSig.innerText = studentName;
+                // [MODIFICAÇÃO] Preenchimento do novo campo de assinatura
+                outputs.studentNameSigVerso.innerText = studentName;
                 outputs.studentDoc.innerText = inputs.studentDoc.value;
                 
                 // --- 3. Dados do Curso (DINÂMICO) ---
@@ -1218,22 +1209,20 @@
             };
 
             /*
-             * [MODIFICAÇÃO] [BLOCO 07] VINCULAÇÃO DE EVENTOS (Listeners)
+             * [BLOCO 07] VINCULAÇÃO DE EVENTOS (Listeners)
+             * (Sem alterações nesta etapa)
             */
             
-            const originalTitle = document.title; // Salva o título original da página
+            const originalTitle = document.title; 
 
-            // Listeners para inputs de TEXTO e SELEÇÃO
             Object.values(elements.inputs).forEach(input => {
                 if (input.type === 'file' || input.id === 'in-select-nr') return;
                 const eventType = (input.tagName === 'SELECT' || input.type === 'date') ? 'change' : 'keyup';
                 input.addEventListener(eventType, syncCertificateData);
             });
             
-            // Listener principal: "Quando mudar a NR, mude as opções de curso"
             elements.inputs.selectNr.addEventListener('change', updateCourseOptions);
             
-            // Listeners para ARQUIVO (Imagem) - Agora atualizam múltiplos alvos
             elements.inputs.companyLogo.addEventListener('change', (e) => {
                 loadImages(e, [elements.outputs.companyLogo, elements.outputs.companyLogoVerso]);
             });
@@ -1244,28 +1233,23 @@
                 loadImages(e, [elements.outputs.watermarkFrente, elements.outputs.watermarkVerso]);
             });
             
-            // Listener do Botão de Imprimir (Com título dinâmico)
             elements.triggers.generateButton.addEventListener('click', () => {
-                syncCertificateData(); // Garante a sincronia final
+                syncCertificateData();
                 
-                // --- Lógica do Título Dinâmico ---
                 try {
-                    const nrKey = elements.inputs.selectNr.value.split('_')[0]; // Ex: "NR11_EMP" vira "NR11"
+                    const nrKey = elements.inputs.selectNr.value.split('_')[0];
                     const studentName = elements.inputs.studentName.value;
                     const endDate = elements.inputs.courseEnd.value;
-                    
-                    const formattedDate = formatDateShort(endDate); // Ex: "11-11-25"
-                    
+                    const formattedDate = formatDateShort(endDate);
                     document.title = `${nrKey} ${studentName} ${formattedDate}`;
                 } catch (err) {
                     console.error("Erro ao formatar título:", err);
-                    document.title = "Certificado"; // Título de fallback
+                    document.title = "Certificado";
                 }
                 
-                window.print(); // Ativa a impressão
+                window.print();
             });
 
-            // Restaura o título original após a impressão
             window.onafterprint = () => {
                 document.title = originalTitle;
             };
