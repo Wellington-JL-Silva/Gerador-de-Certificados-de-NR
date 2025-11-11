@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Certificados de NR</title>
+    <style>
+        /* [BLOCO 01] ESTILO GERAL E PAINEL DE CONTROLE (Sem alterações) */
+        
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Merriweather:wght@400;700&family=Great+Vibes&display=swap');
+
+        :root {
+            --color-primary: #0a3d62;
+            --color-secondary: #005a87;
+            --color-gold: #b38600;
+            --color-background: #f0f2f5;
+            --color-surface: #ffffff;
+            --color-text: #2c2c2c;
+            --color-border: #dcdcdc;
+            --font-body: 'Roboto', sans-serif;
+            --font-display: 'Merriweather', serif;
+            --font-script: 'Great Vibes', cursive; /* Fonte cursiva para assinaturas */
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-background);
+            color: var(--color-text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .control-panel {
+            flex: 1;
+            max-width: 500px;
+            background: var(--color-surface);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            position: sticky;
+            top: 20px;
+            max-height: 95vh;
+            overflow-y: auto; /* Permite rolagem no painel */
+        }
+        
+        .control-panel h1 {
+            font-family: var(--font-display);
+            color: var(--color-primary);
+            text-align: center;
+            margin-top: 0;
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 10px;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-section h3 {
+            font-family: var(--font-body);
+            font-weight: 700;
+            color: var(--color-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .input-group input[type="file"] { padding: 3px; background: #f9f9f9; }
+        
+        .input-group input[type="file"]::file-selector-button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--color-secondary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .input-group input[type="file"]::file-selector-button:hover {
+            background-color: var(--color-primary);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--color-secondary);
+            box-shadow: 0 0 5px rgba(0, 105, 148, 0.2);
+        }
+        
+        textarea { resize: vertical; min-height: 80px; }
+
+        #generatePrint {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, var(--color-secondary), var(--color-primary));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #generatePrint:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(10, 61, 98, 0.3);
+        }
+
+        /* [BLOCO 02] ESTILO DO CERTIFICADO (Sem alterações) */
+
+        .certificate-container {
+            flex: 2;
+            max-width: 1123px; /* Aprox. A4 landscape (29.7cm) */
+        }
+        
+        .certificate-page {
+            background-color: var(--color-surface);
+            width: 29.7cm; /* Padrão A4 Landscape */
+            height: 21cm; /* Padrão A4 Landscape */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 20px auto;
+            padding: 2cm;
+            box-sizing: border-box; 
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .certificate-page::before {
+            content: '';
+            position: absolute;
+            top: 0.8cm;
+            left: 0.8cm;
+            right: 0.8cm;
+            bottom: 0.8cm;
+            border: 6px double var(--color-primary);
+            box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3px var(--color-primary);
+            z-index: 2;
+        }
+        
+        .cert-content {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cert-watermark-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.08;
+            z-index: 1;
+        }
+        
+        #cert-seal {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .cert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-placeholder {
+            flex-shrink: 0;
+            width: 200px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #cert-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .header-text {
+            text-align: center;
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+
+        .header-text h2 {
+            font-family: var(--font-display);
+            font-size: 26pt;
+            color: var(--color-primary);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .header-text h3 {
+            font-family: var(--font-body);
+            font-size: 14pt;
+            color: var(--color-secondary);
+            margin: 5px 0 0 0;
+            font-weight: 400;
+        }
+        
+        .cert-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 2cm;
+        }
+
+        .cert-body p {
+            font-family: var(--font-display);
+            font-size: 13pt;
+            line-height: 1.7;
+            color: var(--color-text);
+            text-align: justify;
+            margin: 15px 0;
+        }
+        
+        .cert-body p strong {
+            font-size: 14pt;
+            color: var(--color-primary);
+        }
+        
+        span[data-field] {
+            font-weight: 700;
+            color: var(--color-primary);
+            font-family: var(--font-display);
+        }
+
+        .cert-signatures {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+
+        .signature-block {
+            width: 40%;
+            font-size: 10pt;
+            padding-top: 8px;
+        }
+        
+        .signature-content-wrapper {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            border-top: 2px solid var(--color-text);
+            padding-top: 8px;
+            gap: 10px;
+        }
+        
+        .signature-text {
+             flex-grow: 1;
+             text-align: center;
+        }
+        
+        .signature-block .name {
+            display: block;
+            font-weight: 700;
+            margin-top: 5px;
+            font-size: 11pt;
+            font-family: var(--font-script);
+        }
+        
+        .signature-block .qual {
+            display: block;
+            font-size: 9pt;
+            color: #555;
+            font-family: var(--font-body);
+        }
+        
+        /* Estilos do VERSO (Sem alterações) */
+        #cert-verso {
+            padding: 1.5cm;
+        }
+        
+        #cert-verso .cert-content {
+             padding: 0 1cm;
+        }
+
+        #cert-verso h4 {
+            font-family: var(--font-display);
+            font-size: 14pt;
+            color: var(--color-primary);
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--color-secondary);
+            padding-bottom: 5px;
+        }
+
+        .program-content {
+            font-family: var(--font-body);
+            font-size: 9pt; 
+            text-align: left;
+            line-height: 1.5;
+            columns: 2;
+            column-gap: 30px;
+            flex-grow: 1;
+        }
+        
+        .program-content h5 {
+            font-size: 10pt;
+            font-weight: 700;
+            color: var(--color-secondary);
+            margin-top: 8px;
+            margin-bottom: 3px;
+        }
+        
+        .program-content ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+            margin-top: 0;
+        }
+
+        .program-content .legal-obs {
+            font-size: 8pt; 
+            line-height: 1.4; 
+            margin: 0; 
+            text-align: justify;
+        }
+        
+        .cert-footer-verso {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 8pt;
+            color: #555;
+            border-top: 1px solid var(--color-border);
+            padding-top: 8px;
+        }
+
+        /* [BLOCO 03] CSS DE IMPRESSÃO (Sem alterações) */
+        
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        @media print {
+            body > *:not(.certificate-container) {
+                display: none;
+            }
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            .certificate-container {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                width: 100%;
+            }
+            .certificate-page {
+                width: 29.7cm;
+                height: 21cm;
+                margin: 0;
+                padding: 2cm;
+                box-shadow: none;
+                border: none;
+                box-sizing: border-box;
+                page-break-inside: avoid;
+            }
+            #cert-verso {
+                page-break-before: always;
+                padding: 1.5cm;
+            }
+            body, p, span, li, h1, h2, h3, h4, h5 {
+                color: #000 !important;
+                background: #fff !important;
+            }
+            .cert-watermark-bg {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <h1>Gerador de NRs</h1>
+
+        <div class="form-section">
+            <h3>1. Imagens (Upload Local)</h3>
+            <div class="input-group">
+                <label for="in-company-logo">Logo da Empresa (Frente)</label>
+                <input type="file" id="in-company-logo" accept="image/*">
+            </div>
+             <div class="input-group">
+                <label for="in-watermark">Marca d'Água / Relevo (Frente e Verso)</label>
+                <input type="file" id="in-watermark" accept="image/*">
+            </div>
+             <div class="input-group">
+                <label for="in-seal">Selo Cromado (Frente)</label>
+                <input type="file" id="in-seal" accept="image/*">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>2. Dados da Empresa</h3>
+            <div class="input-group">
+                <label for="in-company-name">Razão Social</label>
+                <input type="text" id="in-company-name" value="SUA EMPRESA TREINAMENTOS LTDA">
+            </div>
+            <div class="input-group">
+                <label for="in-company-cnpj">CNPJ</label>
+                <input type="text" id="in-company-cnpj" value="00.000.000/0001-00">
+            </div>
+            <div class="input-group">
+                <label for="in-company-address">Endereço Completo</label>
+                <input type="text" id="in-company-address" value="Rua da Segurança, 123 - Centro, São Paulo - SP">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>3. Dados do Aluno</h3>
+            <div class="input-group">
+                <label for="in-student-name">Nome Completo do Aluno</label>
+                <input type="text" id="in-student-name" value="NOME COMPLETO DO ALUNO">
+            </div>
+            <div class="input-group">
+                <label for="in-student-doc">CPF (ou RG)</label>
+                <input type="text" id="in-student-doc" value="000.000.000-00">
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>4. Seleção da Norma</h3>
+            <div class="input-group">
+                <label for="in-select-nr">Norma Regulamentadora</label>
+                <select id="in-select-nr">
+                    </select>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>5. Dados do Curso</h3>
+            <div class="input-group">
+                <label for="in-course-type">Tipo de Treinamento</label>
+                <select id="in-course-type">
+                    </select>
+            </div>
+            <div class="input-group">
+                <label for="in-course-start">Data de Início</label>
+                <input type="date" id="in-course-start" value="2025-11-10">
+            </div>
+            <div class="input-group">
+                <label for="in-course-end">Data de Conclusão</label>
+                <input type="date" id="in-course-end" value="2025-11-11">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>6. Responsáveis</h3>
+            <div class="input-group">
+                <label for="in-instructor-name">Nome do Instrutor</label>
+                <input type="text" id="in-instructor-name" value="Nome do Instrutor">
+            </div>
+            <div class="input-group">
+                <label for="in-instructor-qual">Qualificação do Instrutor</label>
+                <input type="text" id="in-instructor-qual" value="Téc. de Segurança do Trabalho - MTE 0000">
+            </div>
+             <div class="input-group">
+                <label for="in-rt-name">Nome do Responsável Técnico (RT)</label>
+                <input type="text" id="in-rt-name" value="Nome do Responsável Técnico">
+            </div>
+            <div class="input-group">
+                <label for="in-rt-qual">Qualificação do RT</label>
+                <input type="text" id="in-rt-qual" value="Eng. de Segurança do Trabalho - CREA 00000">
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>7. Emissão</h3>
+            <div class="input-group">
+                <label for="in-issue-location">Cidade de Emissão</label>
+                <input type="text" id="in-issue-location" value="Santo André">
+            </div>
+        </div>
+
+        <button id="generatePrint">Gerar e Imprimir Certificado</button>
+    </div>
+
+    <div class="certificate-container">
+        
+        <div id="cert-frente" class="certificate-page">
+            <img id="cert-watermark-frente" class="cert-watermark-bg" src="" alt="">
+            
+            <div class="cert-content">
+                <div class="cert-header">
+                    <div class="logo-placeholder">
+                        <img id="cert-logo" src="" alt="Logo da Empresa">
+                    </div>
+                    <div class="header-text">
+                        <h2 id="cert-company-name">SUA EMPRESA TREINAMENTOS LTDA</h2>
+                        <h3>CERTIFICADO DE PROFICIÊNCIA</h3>
+                    </div>
+                    <div style="width: 200px; flex-shrink: 0;"></div> </div>
+
+                <div class="cert-body">
+                    <p>Certificamos que, para os devidos fins, <strong id="cert-student-name">NOME COMPLETO DO ALUNO</strong>, portador(a) do documento <span data-field id="cert-student-doc">000.000.000-00</span>, participou e concluiu com aproveitamento o treinamento de 
+                        <strong id="cert-course-name">NOME DO CURSO</strong>, 
+                        na qualidade de <span data-field id="cert-course-type">TIPO DE TREINAMENTO</span>.</p>
+                    
+                    <p>O treinamento foi realizado nas instalações da empresa <span data-field id="cert-company-name-body">SUA EMPRESA TREINAMENTOS LTDA</span>, no período de <span data-field id="cert-course-start">DD/MM/AAAA</span> a <span data-field id="cert-course-end">DD/MM/AAAA</span>, com carga horária total de <span data-field id="cert-course-hours">XX</span> horas, em conformidade com os requisitos da Norma Regulamentadora correspondente do Ministério do Trabalho e Emprego.</p>
+                    
+                    <p style="text-align: center; margin-top: 20px;">
+                        <span data-field id="cert-issue-location">Santo André</span>, <span data-field id="cert-issue-date">Data de Emissão</span>.
+                    </p>
+                </div>
+
+                <div class="cert-signatures">
+                    <div class="signature-block">
+                        <div class="signature-content-wrapper">
+                             <div class="signature-text">
+                                <span class="name" id="cert-instructor-name">Nome do Instrutor</span>
+                                <span class="qual" id="cert-instructor-qual">Qualificação</span>
+                                <span class="qual">Instrutor</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="signature-block">
+                         <div class="signature-content-wrapper">
+                             <div class="signature-text">
+                                <span class="name" id="cert-student-name-sig">NOME COMPLETO DO ALUNO</span>
+                                <span class="qual">Aluno</span>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="signature-block">
+                        <div class="signature-content-wrapper">
+                            <div class="signature-text">
+                                <span class="name" id="cert-rt-name">Nome do Responsável Técnico</span>
+                                <span class="qual" id="cert-rt-qual">Qualificação</span>
+                                <span class="qual">Responsável Técnico</span>
+                            </div>
+                            <img id="cert-seal" src="" alt="Selo de Autenticidade">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            </div>
+
+        <div id="cert-verso" class="certificate-page">
+            <img id="cert-watermark-verso" class="cert-watermark-bg" src="" alt="">
+
+            <div class="cert-content">
+                <h4 id="cert-program-title">CONTEÚDO PROGRAMÁTICO</h4>
+                
+                <div class="program-content" id="cert-program-content">
+                    </div>
+
+                <div class="cert-footer-verso">
+                    <strong id="cert-company-name-back">SUA EMPRESA TREINAMENTOS LTDA</strong><br>
+                    CNPJ: <span id="cert-company-cnpj-back">00.000.000/0001-00</span> | 
+                    <span id="cert-company-address-back">Endereço Completo</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            /*
+             * [BLOCO 01] BASE DE DADOS DAS NORMAS (NR_DATA)
+             *
+             * ESTE É O "CÉREBRO" DO SISTEMA.
+             * Para adicionar uma nova NR ou um novo curso, basta
+             * adicionar uma nova entrada aqui seguindo o modelo.
+             *
+             * - title: O nome que aparece no certificado (Frente)
+             * - programTitle: O título que aparece no (Verso)
+             * - options: A lista de cursos (a "essência") que aparece no <select>
+             * - programContentHTML: A função que gera o HTML do verso
+            */
+            const NR_DATA = {
+                // --- NR 33 (Espaço Confinado) ---
+                "NR33": {
+                    title: "NR 33 - Segurança e Saúde nos Trabalhos em Espaços Confinados",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 33 (Anexo II)",
+                    options: [
+                        { text: "Formação - Trabalhador e Vigia (16h)", hours: 16 },
+                        { text: "Reciclagem - Trabalhador e Vigia (8h)", hours: 8 },
+                        { text: "Formação - Supervisor de Entrada (40h)", hours: 40 },
+                        { text: "Reciclagem - Supervisor de Entrada (8h)", hours: 8 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                        const isSupervisor = optionText.includes('Supervisor');
+                        const supervisorContentDisplay = isSupervisor ? 'block' : 'none';
+
+                        return `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo (Trabalhador Autorizado e Vigia):</h5>
+                                <ul>
+                                    <li>Definições e Reconhecimento de Riscos;</li>
+                                    <li>Funcionamento de equipamentos utilizados;</li>
+                                    <li>Procedimentos e utilização da Permissão de Entrada e Trabalho (PET);</li>
+                                    <li>Noções de resgate e primeiros socorros.</li>
+                                </ul>
+                                <h5>Referências Normativas:</h5>
+                                <ul>
+                                    <li>Norma Regulamentadora Nº 33 (Portaria MTP n.º 1.690/2022).</li>
+                                    <li>ABNT NBR 16.577:2017 (Espaço Confinado).</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <ul style="padding-top: 23px; display: ${supervisorContentDisplay};">
+                                    <h5>3. Conteúdo (Supervisor de Entrada):</h5>
+                                    <li>Identificação dos espaços confinados;</li>
+                                    <li>Critérios de indicação e uso de equipamentos;</li>
+                                    <li>Conhecimentos sobre práticas seguras;</li>
+                                    <li>Legislação de segurança e saúde no trabalho;</li>
+                                    <li>Programa de Proteção Respiratória;</li>
+                                    <li>Operação de salvamento.</li>
+                                </ul>
+                                <h5 style="margin-top: ${isSupervisor ? '8px' : '23px'};">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Este certificado atesta a participação no treinamento e não confere ao aluno a autorização para realizar o trabalho,
+                                    cabendo à empresa contratante a emissão da devida autorização formal.
+                                    Validade recomendada: 12 meses.
+                                </p>
+                            </div>
+                        `;
+                    }
+                },
+                // --- NR 35 (Trabalho em Altura) ---
+                "NR35": {
+                    title: "NR 35 - Trabalho em Altura",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 35 (Anexo I)",
+                    options: [
+                        { text: "Formação - Trabalhador Autorizado (8h)", hours: 8 },
+                        { text: "Reciclagem - Trabalhador Autorizado (4h)", hours: 4 }, // Ajustado para 4h
+                        { text: "Formação - Supervisor (40h)", hours: 40 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                         const isSupervisor = optionText.includes('Supervisor');
+                         const supervisorContentDisplay = isSupervisor ? 'block' : 'none';
+                        return `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo (Trabalhador Autorizado):</h5>
+                                <ul>
+                                    <li>Normas e regulamentos aplicáveis ao trabalho em altura;</li>
+                                    <li>Análise de Risco e condições impeditivas;</li>
+                                    <li>Riscos potenciais e medidas de prevenção e controle;</li>
+                                    <li>Sistemas, equipamentos e procedimentos de proteção coletiva;</li>
+                                    <li>Equipamentos de Proteção Individual (EPI);</li>
+                                    <li>Sistemas de Ancoragem;</li>
+                                    <li>Condutas em situações de emergência (Primeiros Socorros).</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <ul style="padding-top: 23px; display: ${supervisorContentDisplay};">
+                                    <h5>3. Conteúdo (Supervisor):</h5>
+                                    <li>Planejamento, organização e execução (PAE);</li>
+                                    <li>Inspeção e seleção de equipamentos;</li>
+                                    <li>Técnicas de resgate e plano de emergência;</li>
+                                    <li>Gestão de riscos e documentação.</li>
+                                </ul>
+                                <h5 style="margin-top: ${isSupervisor ? '8px' : '23px'};">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Este certificado atesta a participação no treinamento e não confere ao aluno a autorização para realizar o trabalho.
+                                    Validade recomendada: 24 meses.
+                                </p>
+                            </div>
+                        `;
+                    }
+                },
+                // --- NR 01 (GRO/PGR) ---
+                "NR01": {
+                    title: "NR 01 - Disposições Gerais e Gerenciamento de Riscos Ocupacionais",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 01 (GRO/PGR)",
+                    options: [
+                        { text: "Conscientização (Todos os Colaboradores) (2h)", hours: 2 },
+                        { text: "Implementação e Gestão do GRO/PGR (8h)", hours: 8 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                        const isGestao = optionText.includes('Gestão');
+                        const gestaoContentDisplay = isGestao ? 'block' : 'none';
+                        return `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo (Conscientização):</h5>
+                                <ul>
+                                    <li>Conceitos de perigo e risco;</li>
+                                    <li>Direitos e deveres do trabalhador;</li>
+                                    <li>Hierarquia das medidas de controle;</li>
+                                    <li>Procedimentos em caso de emergência.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <ul style="padding-top: 23px; display: ${gestaoContentDisplay};">
+                                    <h5>3. Conteúdo (Gestão GRO/PGR):</h5>
+                                    <li>Estrutura da NR 01 e o GRO;</li>
+                                    <li>Inventário de Riscos;</li>
+                                    <li>Plano de Ação;</li>
+                                    <li>Acompanhamento e Análise Crítica.</li>
+                                </ul>
+                                <h5 style="margin-top: ${isGestao ? '8px' : '23px'};">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Treinamento em conformidade com o item 1.7 da Norma Regulamentadora nº 01, visando o cumprimento das disposições legais sobre segurança e saúde no trabalho.
+                                </p>
+                            </div>
+                        `;
+                    }
+                },
+                // --- NR 06 (EPI) ---
+                "NR06": {
+                    title: "NR 06 - Equipamento de Proteção Individual (EPI)",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 06",
+                    options: [
+                        { text: "Uso, Conservação e Guarda (4h)", hours: 4 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                        return `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo Programático:</h5>
+                                <ul>
+                                    <li>Definição legal de EPI e EPC;</li>
+                                    <li>Responsabilidades do empregador e do trabalhador;</li>
+                                    <li>Tipos de EPI (Proteção de cabeça, olhos, membros, etc.);</li>
+                                    <li>Seleção, uso e limitações do EPI;</li>
+                                    <li>Inspeção, limpeza, conservação e descarte;</li>
+                                    <li>Importância do Certificado de Aprovação (CA).</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 style="padding-top: 23px;">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Treinamento em conformidade com o item 6.7.1 da Norma Regulamentadora nº 06, visando capacitar o trabalhador sobre o uso, guarda e conservação dos EPIs.
+                                </p>
+                            </div>
+                        `;
+                    }
+                },
+                // --- NR 11 (Movimentação - Empilhadeira) ---
+                "NR11_EMP": {
+                    title: "NR 11 - Operação de Empilhadeira",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 11 (Anexo I)",
+                    options: [
+                        { text: "Formação - Operador de Empilhadeira (16h)", hours: 16 },
+                        { text: "Reciclagem - Operador de Empilhadeira (8h)", hours: 8 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                        return `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo Teórico:</h5>
+                                <ul>
+                                    <li>Legislação (NR 11);</li>
+                                    <li>Tipos de empilhadeiras e seus componentes;</li>
+                                    <li>Princípios de equilíbrio e estabilidade (centro de carga);</li>
+                                    <li>Inspeção "Check-list" diário;</li>
+                                    <li>Regras de circulação e segurança.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 style="padding-top: 23px;">3. Conteúdo Prático:</h5>
+                                <ul>
+                                    <li>Reconhecimento da máquina;</li>
+                                    <li>Manobras em áreas livres e com obstáculos;</li>
+                                    <li>Técnicas de empilhamento e desempilhamento;</li>
+                                    <li>Estacionamento seguro.</li>
+                                </ul>
+                                <h5 style="margin-top: 8px;">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Treinamento conforme item 11.1.5 e Anexo I da NR 11. A validade do cartão de operador está condicionada ao exame de saúde (ASO) anual.
+                                </p>
+                            </div>
+                        `;
+                    }
+                },
+                // --- NR 12 (Máquinas e Equipamentos) ---
+                "NR12": {
+                    title: "NR 12 - Segurança no Trabalho em Máquinas e Equipamentos",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 12",
+                    options: [
+                        { text: "Formação - Operação Segura (8h)", hours: 8 },
+                        { text: "Capacitação - Manutenção e Instalação (16h)", hours: 16 },
+                        { text: "Apreciação de Riscos (Sistemas de Segurança) (20h)", hours: 20 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                        return `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo Programático:</h5>
+                                <ul>
+                                    <li>Descrição e funcionamento da NR 12;</li>
+                                    <li>Arranjo físico e instalações;</li>
+                                    <li>Sistemas de segurança (proteções fixas, móveis, intertravamento);</li>
+                                    <li>Dispositivos de partida, acionamento e parada (Parada de Emergência);</li>
+                                    <li>Riscos mecânicos, elétricos e outros;</li>
+                                    <li>Procedimentos de trabalho e segurança;</li>
+                                    <li>Bloqueio e etiquetagem (Lockout/Tagout - LOTO).</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 style="padding-top: 23px;">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Treinamento em conformidade com o Anexo II da Norma Regulamentadora nº 12, visando a prevenção de acidentes e doenças do trabalho nas fases de operação e manutenção.
+                                </p>
+                            </div>
+                        `;
+                    }
+                },
+                // --- NR 18 (Construção Civil) ---
+                "NR18": {
+                    title: "NR 18 - Segurança e Saúde no Trabalho na Indústria da Construção",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 18",
+                    options: [
+                        { text: "Treinamento Admissional (Integração) (6h)", hours: 6 },
+                        { text: "Operador de Plataforma Elevatória (PTA) (8h)", hours: 8 },
+                        { text: "Sinaleiro / Amarrador de Carga (16h)", hours: 16 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                        let content = `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo (Admissional - Item 18.2.8):</h5>
+                                <ul>
+                                    <li>Informações sobre as condições e meio ambiente de trabalho;</li>
+                                    <li>Riscos inerentes à função;</li>
+                                    <li>Uso adequado dos Equipamentos de Proteção Individual (EPI);</li>
+                                    <li>Informações sobre os Equipamentos de Proteção Coletiva (EPC).</li>
+                                </ul>
+                            </div>
+                        `;
+                        
+                        if (optionText.includes('PTA')) {
+                             content = `
+                                <div>
+                                    <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                    <h5>2. Conteúdo (Operador de PTA):</h5>
+                                    <ul>
+                                        <li>Tipos de PTA e suas características;</li>
+                                        <li>Inspeção visual e "check-list" (walk-around);</li>
+                                        <li>Princípios de estabilidade e nivelamento;</li>
+                                        <li>Operação segura (solo e cesto);</li>
+                                        <li>Procedimentos de emergência e resgate.</li>
+                                    </ul>
+                                </div>
+                            `;
+                        }
+                        
+                        return `
+                            ${content}
+                            <div>
+                                <h5 style="padding-top: 23px;">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Capacitação realizada em conformidade com os requisitos da Norma Regulamentadora nº 18, visando a segurança dos trabalhadores no canteiro de obras.
+                                </p>
+                            </div>
+                        `;
+                    }
+                },
+                // --- NR 20 (Inflamáveis e Combustíveis) ---
+                "NR20": {
+                    title: "NR 20 - Segurança e Saúde no Trabalho com Inflamáveis e Combustíveis",
+                    programTitle: "CONTEÚDO PROGRAMÁTICO - NR 20 (Anexo II)",
+                    options: [
+                        { text: "Formação - Curso Básico (8h)", hours: 8 },
+                        { text: "Formação - Curso Intermediário (16h)", hours: 16 },
+                        { text: "Formação - Curso Avançado I (24h)", hours: 24 },
+                        { text: "Reciclagem (Anual) (4h)", hours: 4 },
+                    ],
+                    programContentHTML: (hours, optionText) => {
+                        return `
+                            <div>
+                                <h5>1. Carga horária: <span data-field>${hours}</span> horas</h5>
+                                <h5>2. Conteúdo Programático (Base):</h5>
+                                <ul>
+                                    <li>Inflamáveis: características, propriedades, perigos e riscos;</li>
+                                    <li>Controles da exposição (EPC e EPI);</li>
+                                    <li>Proteção contra incêndio;</li>
+                                    <li>Noções de primeiros socorros.</li>
+                                </ul>
+                                <h5 style="display: ${hours > 8 ? 'block' : 'none'};">3. Conteúdo (Intermediário/Avançado):</h5>
+                                <ul>
+                                    <li>Fontes de ignição e seu controle;</li>
+                                    <li>Procedimentos de emergência e Permissão de Trabalho (PT);</li>
+                                    <li>Sistemas de combate a incêndio.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 style="padding-top: 23px;">Observações Legais:</h5>
+                                <p class="legal-obs">
+                                    Treinamento em conformidade com o Anexo II da Norma Regulamentadora nº 20, com validade de acordo com a classe da instalação (Básico: 3 anos, Intermediário: 2 anos, Avançado: 1 ano).
+                                </p>
+                            </div>
+                        `;
+                    }
+                }
+                // [OBS]: Você pode adicionar a NR 24 (Condições Sanitárias) ou outras
+                // da mesma forma que adicionei estas acima.
+            };
+
+            /*
+             * [BLOCO 02] MAPEAMENTO DE DOM
+             * Mapeia todos os inputs e outputs uma única vez
+            */
+            const elements = {
+                inputs: {
+                    companyName: document.getElementById('in-company-name'),
+                    companyCnpj: document.getElementById('in-company-cnpj'),
+                    companyAddress: document.getElementById('in-company-address'),
+                    companyLogo: document.getElementById('in-company-logo'),
+                    watermark: document.getElementById('in-watermark'),
+                    seal: document.getElementById('in-seal'),
+                    studentName: document.getElementById('in-student-name'),
+                    studentDoc: document.getElementById('in-student-doc'),
+                    selectNr: document.getElementById('in-select-nr'),
+                    courseType: document.getElementById('in-course-type'),
+                    courseStart: document.getElementById('in-course-start'),
+                    courseEnd: document.getElementById('in-course-end'),
+                    instructorName: document.getElementById('in-instructor-name'),
+                    instructorQual: document.getElementById('in-instructor-qual'),
+                    rtName: document.getElementById('in-rt-name'),
+                    rtQual: document.getElementById('in-rt-qual'),
+                    issueLocation: document.getElementById('in-issue-location'),
+                },
+                outputs: {
+                    companyName: document.getElementById('cert-company-name'),
+                    companyNameBody: document.getElementById('cert-company-name-body'),
+                    companyNameBack: document.getElementById('cert-company-name-back'),
+                    companyCnpjBack: document.getElementById('cert-company-cnpj-back'),
+                    companyAddressBack: document.getElementById('cert-company-address-back'),
+                    companyLogo: document.getElementById('cert-logo'),
+                    watermarkFrente: document.getElementById('cert-watermark-frente'),
+                    watermarkVerso: document.getElementById('cert-watermark-verso'),
+                    seal: document.getElementById('cert-seal'),
+                    studentName: document.getElementById('cert-student-name'),
+                    studentNameSig: document.getElementById('cert-student-name-sig'),
+                    studentDoc: document.getElementById('cert-student-doc'),
+                    courseName: document.getElementById('cert-course-name'),
+                    courseType: document.getElementById('cert-course-type'),
+                    courseStart: document.getElementById('cert-course-start'),
+                    courseEnd: document.getElementById('cert-course-end'),
+                    courseHours: document.getElementById('cert-course-hours'),
+                    instructorName: document.getElementById('cert-instructor-name'),
+                    instructorQual: document.getElementById('cert-instructor-qual'),
+                    rtName: document.getElementById('cert-rt-name'),
+                    rtQual: document.getElementById('cert-rt-qual'),
+                    issueLocation: document.getElementById('cert-issue-location'),
+                    issueDate: document.getElementById('cert-issue-date'),
+                    programTitle: document.getElementById('cert-program-title'),
+                    programContent: document.getElementById('cert-program-content'),
+                },
+                triggers: {
+                    generateButton: document.getElementById('generatePrint'),
+                }
+            };
+            
+            /*
+             * [BLOCO 03] FUNÇÕES DE UTILIDADE (Formatação e Imagem)
+            */
+            
+            // Formata data AAAA-MM-DD para DD/MM/AAAA
+            const formatDate = (dateString) => {
+                if (!dateString) return 'DD/MM/AAAA';
+                const [year, month, day] = dateString.split('-');
+                return `${day}/${month}/${year}`;
+            };
+            
+            // Formata data AAAA-MM-DD para "DD de [Mês] de AAAA"
+            const formatDateExtended = (dateString) => {
+                if (!dateString) return 'Data de Emissão';
+                const date = new Date(`${dateString}T12:00:00`); 
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                return date.toLocaleDateString('pt-BR', options);
+            };
+
+            // Carrega uma imagem local em um elemento <img>
+            const loadImage = (event, targetElement) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        targetElement.src = e.target.result;
+                        targetElement.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            
+            // Carrega a marca d'água (frente e verso)
+            const loadWatermark = (event) => {
+                 const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (re) => {
+                        const imageUrl = re.target.result;
+                        elements.outputs.watermarkFrente.src = imageUrl;
+                        elements.outputs.watermarkVerso.src = imageUrl;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            /*
+             * [BLOCO 04] FUNÇÕES DE PREENCHIMENTO DINÂMICO
+            */
+            
+            // Preenche o <select> de NORMAS (NR 33, NR 35, etc.)
+            const populateNrSelect = () => {
+                const { inputs } = elements;
+                const nrKeys = Object.keys(NR_DATA); 
+                
+                inputs.selectNr.innerHTML = ''; // Limpa opções existentes
+                
+                nrKeys.forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    // Pega o "NR 33" ou "NR 11" antes do " - "
+                    option.text = NR_DATA[key].title.split(' - ')[0]; 
+                    inputs.selectNr.appendChild(option);
+                });
+            };
+
+            // Preenche o <select> de TIPO DE CURSO (Trabalhador, Supervisor, etc.)
+            // Esta é a função que garante que a "essência" seja mantida
+            const updateCourseOptions = () => {
+                const { inputs } = elements;
+                const selectedNrKey = inputs.selectNr.value;
+                const nrInfo = NR_DATA[selectedNrKey];
+
+                inputs.courseType.innerHTML = ''; // Limpa opções de curso
+                
+                if (nrInfo && nrInfo.options) {
+                    nrInfo.options.forEach(courseOption => {
+                        const option = document.createElement('option');
+                        option.value = courseOption.text;
+                        option.text = courseOption.text; // Ex: "Formação - Trabalhador e Vigia (16h)"
+                        option.dataset.hours = courseOption.hours;
+                        inputs.courseType.appendChild(option);
+                    });
+                }
+                
+                // Após atualizar as opções, sincronizamos o certificado
+                syncCertificateData();
+            };
+
+            
+            /*
+             * [BLOCO 05] FUNÇÃO PRINCIPAL (syncCertificateData)
+            */
+            const syncCertificateData = () => {
+                const { inputs, outputs } = elements;
+                
+                // --- 1. Dados da Empresa ---
+                const companyName = inputs.companyName.value;
+                outputs.companyName.innerText = companyName;
+                outputs.companyNameBody.innerText = companyName;
+                outputs.companyNameBack.innerText = companyName;
+                outputs.companyCnpjBack.innerText = inputs.companyCnpj.value;
+                outputs.companyAddressBack.innerText = inputs.companyAddress.value;
+                                
+                // --- 2. Dados do Aluno ---
+                const studentName = inputs.studentName.value;
+                outputs.studentName.innerText = studentName;
+                outputs.studentNameSig.innerText = studentName;
+                outputs.studentDoc.innerText = inputs.studentDoc.value;
+                
+                // --- 3. Dados do Curso (DINÂMICO) ---
+                const selectedNrKey = inputs.selectNr.value;
+                const nrInfo = NR_DATA[selectedNrKey];
+                const selectedOption = inputs.courseType.options[inputs.courseType.selectedIndex];
+                
+                if (!nrInfo || !selectedOption) return; // Segurança
+                
+                const courseTypeText = selectedOption.text.split('(')[0].trim();
+                const courseHours = selectedOption.dataset.hours; 
+                
+                // Atualiza a FRENTE
+                outputs.courseName.innerText = nrInfo.title;
+                outputs.courseType.innerText = courseTypeText;
+                outputs.courseHours.innerText = courseHours;
+                
+                // Atualiza o VERSO
+                outputs.programTitle.innerText = nrInfo.programTitle;
+                outputs.programContent.innerHTML = nrInfo.programContentHTML(courseHours, selectedOption.text);
+                
+                // --- 4. Datas ---
+                outputs.courseStart.innerText = formatDate(inputs.courseStart.value);
+                outputs.courseEnd.innerText = formatDate(inputs.courseEnd.value);
+                
+                // --- 5. Responsáveis ---
+                outputs.instructorName.innerText = inputs.instructorName.value;
+                outputs.instructorQual.innerText = inputs.instructorQual.value;
+                outputs.rtName.innerText = inputs.rtName.value;
+                outputs.rtQual.innerText = inputs.rtQual.value;
+                
+                // --- 6. Emissão ---
+                outputs.issueLocation.innerText = inputs.issueLocation.value;
+                outputs.issueDate.innerText = formatDateExtended(inputs.courseEnd.value);
+            };
+
+            /*
+             * [BLOCO 07] VINCULAÇÃO DE EVENTOS (Listeners)
+            */
+
+            // Listeners para inputs de TEXTO e SELEÇÃO
+            Object.values(elements.inputs).forEach(input => {
+                if (input.type === 'file' || input.id === 'in-select-nr') return;
+                const eventType = (input.tagName === 'SELECT' || input.type === 'date') ? 'change' : 'keyup';
+                input.addEventListener(eventType, syncCertificateData);
+            });
+            
+            // Listener principal: "Quando mudar a NR, mude as opções de curso"
+            elements.inputs.selectNr.addEventListener('change', updateCourseOptions);
+            
+            // Listeners para ARQUIVO (Imagem)
+            elements.inputs.companyLogo.addEventListener('change', (e) => loadImage(e, elements.outputs.companyLogo));
+            elements.inputs.seal.addEventListener('change', (e) => loadImage(e, elements.outputs.seal));
+            elements.inputs.watermark.addEventListener('change', loadWatermark);
+            
+            // Listener do Botão de Imprimir
+            elements.triggers.generateButton.addEventListener('click', () => {
+                syncCertificateData();
+                window.print();
+            });
+
+            // --- INICIALIZAÇÃO DO SISTEMA ---
+            populateNrSelect();     // 1. Preenche o seletor de NRs
+            updateCourseOptions();  // 2. Preenche os tipos de curso da primeira NR
+        });
+    </script>
+</body>
+</html>
