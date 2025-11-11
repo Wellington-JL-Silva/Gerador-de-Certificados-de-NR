@@ -443,6 +443,67 @@
                 display: block !important;
             }
         }
+        
+        /* [MODIFICAÇÃO] [BLOCO 05] CSS RESPONSIVO (Layout Mobile) */
+        
+        /* Esta query é ativada em telas com 1000px de largura ou menos */
+        @media screen and (max-width: 1000px) {
+            
+            body {
+                flex-direction: column; /* Empilha o painel e o certificado */
+                align-items: center;  /* Centraliza o conteúdo */
+                padding: 10px;        /* Menos preenchimento */
+                gap: 10px;            /* Reduz o espaço entre os blocos */
+            }
+
+            .control-panel {
+                position: static;     /* Remove o "grude" (sticky) */
+                width: 100%;        /* Ocupa a largura total */
+                max-width: 100%;
+                max-height: none;     /* Remove limite de altura */
+                margin-bottom: 20px;
+                box-sizing: border-box; /* Garante que o padding seja incluído */
+            }
+
+            .certificate-container {
+                width: 100%;          /* Ocupa a largura total */
+                max-width: 100%;
+                flex: auto;           /* Remove a proporção de flex */
+                
+                /* [IMPORTANTE] Permite a rolagem horizontal
+                   para ver o certificado A4 completo */
+                overflow-x: auto;
+                
+                /* Adiciona uma indicação visual de rolagem */
+                border: 1px dashed var(--color-border);
+                padding: 10px;
+                box-sizing: border-box;
+            }
+
+            /* No celular, o conteúdo programático não precisa de colunas */
+            .program-content {
+                columns: 1;
+            }
+            
+            /* Ajusta o tamanho da fonte do cabeçalho no celular */
+            .header-text h2 {
+                font-size: 18pt;
+            }
+            .header-text h3 {
+                font-size: 12pt;
+            }
+            
+            /* Ajusta o corpo do texto */
+            .cert-body p {
+                font-size: 11pt;
+                line-height: 1.6;
+            }
+            .cert-body p strong {
+                font-size: 12pt;
+            }
+        }
+        
+        
     </style>
 </head>
 <body>
