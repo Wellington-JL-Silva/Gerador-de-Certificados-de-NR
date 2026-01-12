@@ -8,6 +8,7 @@
         /* [BLOCO 01] ESTILO GERAL E PAINEL DE CONTROLE */
         
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Merriweather:wght@400;700&family=Great+Vibes&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');
 
         :root {
             --color-primary: #0a3d62;
@@ -117,22 +118,39 @@
         
         textarea { resize: vertical; min-height: 80px; }
 
-        #generatePrint {
+        .btn-action {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(145deg, var(--color-secondary), var(--color-primary));
-            color: white;
             border: none;
             border-radius: 5px;
             font-size: 1.1em;
             font-weight: 700;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 10px;
         }
 
-        #generatePrint:hover {
+        #generatePrint {
+            background: linear-gradient(145deg, var(--color-secondary), var(--color-primary));
+            color: white;
+        }
+
+        #downloadHtml {
+            background: #27ae60;
+            color: white;
+            font-size: 1em;
+        }
+
+        .btn-action:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(10, 61, 98, 0.3);
+            box-shadow: 0 6px 20px rgba(0,0,0, 0.2);
+        }
+
+        /* Estilos extras para personalização visual */
+        .style-controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
         }
 
         /* [BLOCO 02] ESTILO DO CERTIFICADO (Frente) */
@@ -378,8 +396,11 @@
         }
         
         /* [MODIFICAÇÃO] Estilo para a assinatura no verso */
-        .cert-signature-verso {
-            margin-top: 15px; /* Espaço entre o conteúdo e a assinatura */
+        .cert-signature-verso-container {
+            margin-top: 15px; 
+            display: flex;
+            justify-content: space-around; /* Distribui as assinaturas */
+            gap: 20px;
         }
         
         .cert-verso-images {
@@ -437,6 +458,7 @@
             body, p, span, li, h1, h2, h3, h4, h5, strong, div, img {
                 color: #000 !important;
                 background-color: transparent !important;
+                -webkit-print-color-adjust: exact;
             }
             
             .cert-watermark-bg {
@@ -446,7 +468,6 @@
         
         /* [MODIFICAÇÃO] [BLOCO 05] CSS RESPONSIVO (Layout Mobile) */
         
-        /* Esta query é ativada em telas com 1000px de largura ou menos */
         @media screen and (max-width: 1000px) {
             
             body {
@@ -502,8 +523,6 @@
                 font-size: 12pt;
             }
         }
-        
-        
     </style>
 </head>
 <body>
@@ -565,6 +584,10 @@
                 <select id="in-course-type"></select>
             </div>
             <div class="input-group">
+                <label for="in-custom-content">Conteúdo Programático Personalizado (Opcional - Substitui o padrão)</label>
+                <textarea id="in-custom-content" placeholder="Se preenchido, este texto aparecerá no verso no lugar do conteúdo padrão da NR. Aceita HTML básico (<ul>, <li>, <br>)."></textarea>
+            </div>
+            <div class="input-group">
                 <label for="in-course-start">Data de Início</label>
                 <input type="date" id="in-course-start" value="2025-11-10">
             </div>
@@ -599,7 +622,72 @@
                 <input type="text" id="in-issue-location" value="Santo André">
             </div>
         </div>
-        <button id="generatePrint">Gerar e Imprimir Certificado</button>
+
+        <!-- [NOVA SEÇÃO] Personalização Visual -->
+        <div class="form-section">
+            <h3>8. Personalização Visual</h3>
+            
+            <div class="input-group">
+                <label>Título Principal (Fonte e Tamanho)</label>
+                <div class="style-controls">
+                    <select id="font-family-title">
+                        <option value="'Merriweather', serif">Merriweather (Padrão)</option>
+                        <option value="'Roboto', sans-serif">Roboto</option>
+                        <option value="'Open Sans', sans-serif">Open Sans</option>
+                        <option value="'Playfair Display', serif">Playfair Display</option>
+                        <option value="'Montserrat', sans-serif">Montserrat</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Times New Roman, serif">Times New Roman</option>
+                    </select>
+                    <input type="number" id="font-size-title" value="26" min="10" max="50" step="1">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Nome do Aluno (Fonte e Tamanho)</label>
+                <div class="style-controls">
+                    <select id="font-family-student">
+                        <option value="'Merriweather', serif">Merriweather (Padrão)</option>
+                        <option value="'Roboto', sans-serif">Roboto</option>
+                        <option value="'Great Vibes', cursive">Great Vibes</option>
+                        <option value="'Playfair Display', serif">Playfair Display</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                    </select>
+                    <input type="number" id="font-size-student" value="14" min="10" max="40" step="1">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Texto do Corpo (Fonte e Tamanho)</label>
+                <div class="style-controls">
+                    <select id="font-family-body">
+                        <option value="'Merriweather', serif">Merriweather (Padrão)</option>
+                        <option value="'Roboto', sans-serif">Roboto</option>
+                        <option value="'Lato', sans-serif">Lato</option>
+                        <option value="'Open Sans', sans-serif">Open Sans</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                    </select>
+                    <input type="number" id="font-size-body" value="13" min="8" max="24" step="0.5">
+                </div>
+            </div>
+
+             <div class="input-group">
+                <label>Assinaturas (Fonte - Nomes)</label>
+                <select id="font-family-sig">
+                    <option value="'Great Vibes', cursive">Great Vibes (Padrão - Manuscrita)</option>
+                    <option value="'Merriweather', serif">Merriweather</option>
+                    <option value="'Roboto', sans-serif">Roboto</option>
+                    <option value="'Playfair Display', serif">Playfair Display</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>9. Ações Extras</h3>
+            <button id="generatePrint" class="btn-action">Gerar e Imprimir Certificado</button>
+            <button id="downloadHtml" class="btn-action">Baixar HTML Editável</button>
+        </div>
     </div>
 
     <div class="certificate-container">
@@ -620,13 +708,13 @@
                 </div>
 
                 <div class="cert-body">
-                    <p>Certificamos que, para os devidos fins, <strong id="cert-student-name">NOME COMPLETO DO ALUNO</strong>, portador(a) do documento <span data-field id="cert-student-doc">000.000.000-00</span>, participou e concluiu com aproveitamento o treinamento de 
+                    <p id="cert-text-body">Certificamos que, para os devidos fins, <strong id="cert-student-name">NOME COMPLETO DO ALUNO</strong>, portador(a) do documento <span data-field id="cert-student-doc">000.000.000-00</span>, participou e concluiu com aproveitamento o treinamento de 
                         <strong id="cert-course-name">NOME DO CURSO</strong>, 
                         na qualidade de <span data-field id="cert-course-type">TIPO DE TREINAMENTO</span>.</p>
                     
-                    <p>O treinamento foi realizado nas instalações da empresa <span data-field id="cert-company-name-body">SUA EMPRESA TREINAMENTOS LTDA</span>, no período de <span data-field id="cert-course-start">DD/MM/AAAA</span> a <span data-field id="cert-course-end">DD/MM/AAAA</span>, com carga horária total de <span data-field id="cert-course-hours">XX</span> horas, em conformidade com os requisitos da Norma Regulamentadora correspondente do Ministério do Trabalho e Emprego.</p>
+                    <p style="font-family: inherit;">O treinamento foi realizado nas instalações da empresa <span data-field id="cert-company-name-body">SUA EMPRESA TREINAMENTOS LTDA</span>, no período de <span data-field id="cert-course-start">DD/MM/AAAA</span> a <span data-field id="cert-course-end">DD/MM/AAAA</span>, com carga horária total de <span data-field id="cert-course-hours">XX</span> horas, em conformidade com os requisitos da Norma Regulamentadora correspondente do Ministério do Trabalho e Emprego.</p>
                     
-                    <p style="text-align: center; margin-top: 20px;">
+                    <p style="text-align: center; margin-top: 20px; font-family: inherit;">
                         <span data-field id="cert-issue-location">Santo André</span>, <span data-field id="cert-issue-date">Data de Emissão</span>.
                     </p>
                 </div>
@@ -635,7 +723,7 @@
                     <div class="signature-block">
                         <div class="signature-content-wrapper">
                              <div class="signature-text">
-                                <span class="name" id="cert-instructor-name">Nome do Instrutor</span>
+                                <span class="name sig-font-target" id="cert-instructor-name">Nome do Instrutor</span>
                                 <span class="qual" id="cert-instructor-qual">Qualificação</span>
                                 <span class="qual">Instrutor</span>
                             </div>
@@ -644,7 +732,7 @@
                     <div class="signature-block">
                          <div class="signature-content-wrapper">
                              <div class="signature-text">
-                                <span class="name" id="cert-student-name-sig">NOME COMPLETO DO ALUNO</span>
+                                <span class="name sig-font-target" id="cert-student-name-sig">NOME COMPLETO DO ALUNO</span>
                                 <span class="qual">Aluno</span>
                             </div>
                         </div>
@@ -652,7 +740,7 @@
                      <div class="signature-block">
                         <div class="signature-content-wrapper">
                             <div class="signature-text">
-                                <span class="name" id="cert-rt-name">Nome do Responsável Técnico</span>
+                                <span class="name sig-font-target" id="cert-rt-name">Nome do Responsável Técnico</span>
                                 <span class="qual" id="cert-rt-qual">Qualificação</span>
                                 <span class="qual">Responsável Técnico</span>
                             </div>
@@ -677,14 +765,26 @@
                 <h4 id="cert-program-title">CONTEÚDO PROGRAMÁTICO</h4>
                 
                 <div class="program-content" id="cert-program-content">
-                    </div>
+                    <!-- O conteúdo será injetado aqui -->
+                </div>
 
-                <div class="cert-signature-verso">
-                    <div class="signature-block" style="width: 60%; margin: 20px auto 0 auto;">
+                <div class="cert-signature-verso-container">
+                    <!-- Assinatura do Aluno (Já existia) -->
+                    <div class="signature-block" style="width: 45%;">
                         <div class="signature-content-wrapper">
                             <div class="signature-text">
-                                <span class="name" id="cert-student-name-sig-verso">NOME COMPLETO DO ALUNO</span>
+                                <span class="name sig-font-target" id="cert-student-name-sig-verso">NOME COMPLETO DO ALUNO</span>
                                 <span class="qual">Aluno</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- [NOVO] Assinatura do Responsável no Verso -->
+                    <div class="signature-block" style="width: 45%;">
+                         <div class="signature-content-wrapper">
+                            <div class="signature-text">
+                                <span class="name sig-font-target" id="cert-instructor-sig-verso">Nome do Instrutor</span>
+                                <span class="qual">Instrutor / Responsável Técnico</span>
                             </div>
                         </div>
                     </div>
@@ -1097,6 +1197,8 @@
                     studentDoc: document.getElementById('in-student-doc'),
                     selectNr: document.getElementById('in-select-nr'),
                     courseType: document.getElementById('in-course-type'),
+                    // [NOVO] Input de conteúdo personalizado
+                    customContent: document.getElementById('in-custom-content'),
                     courseStart: document.getElementById('in-course-start'),
                     courseEnd: document.getElementById('in-course-end'),
                     instructorName: document.getElementById('in-instructor-name'),
@@ -1104,6 +1206,15 @@
                     rtName: document.getElementById('in-rt-name'),
                     rtQual: document.getElementById('in-rt-qual'),
                     issueLocation: document.getElementById('in-issue-location'),
+                },
+                styleInputs: {
+                    fontFamilyTitle: document.getElementById('font-family-title'),
+                    fontSizeTitle: document.getElementById('font-size-title'),
+                    fontFamilyStudent: document.getElementById('font-family-student'),
+                    fontSizeStudent: document.getElementById('font-size-student'),
+                    fontFamilyBody: document.getElementById('font-family-body'),
+                    fontSizeBody: document.getElementById('font-size-body'),
+                    fontFamilySig: document.getElementById('font-family-sig'),
                 },
                 outputs: {
                     companyName: document.getElementById('cert-company-name'),
@@ -1119,8 +1230,9 @@
                     sealVerso: document.getElementById('cert-seal-verso'),
                     studentName: document.getElementById('cert-student-name'),
                     studentNameSig: document.getElementById('cert-student-name-sig'),
-                    // [MODIFICAÇÃO] Mapeamento do novo campo de assinatura
                     studentNameSigVerso: document.getElementById('cert-student-name-sig-verso'),
+                    // [NOVO] Assinatura do instrutor no verso
+                    instructorSigVerso: document.getElementById('cert-instructor-sig-verso'),
                     studentDoc: document.getElementById('cert-student-doc'),
                     courseName: document.getElementById('cert-course-name'),
                     courseType: document.getElementById('cert-course-type'),
@@ -1135,9 +1247,11 @@
                     issueDate: document.getElementById('cert-issue-date'),
                     programTitle: document.getElementById('cert-program-title'),
                     programContent: document.getElementById('cert-program-content'),
+                    textBody: document.getElementById('cert-text-body'),
                 },
                 triggers: {
                     generateButton: document.getElementById('generatePrint'),
+                    downloadButton: document.getElementById('downloadHtml'),
                 }
             };
             
@@ -1180,6 +1294,10 @@
                     reader.readAsDataURL(file);
                 }
             };
+
+            const updateStyle = (element, property, value) => {
+                if(element) element.style[property] = value;
+            }
 
             /*
              * [BLOCO 04] FUNÇÕES DE PREENCHIMENTO DINÂMICO
@@ -1233,7 +1351,6 @@
                 const studentName = inputs.studentName.value;
                 outputs.studentName.innerText = studentName;
                 outputs.studentNameSig.innerText = studentName;
-                // [MODIFICAÇÃO] Preenchimento do novo campo de assinatura
                 outputs.studentNameSigVerso.innerText = studentName;
                 outputs.studentDoc.innerText = inputs.studentDoc.value;
                 
@@ -1252,7 +1369,14 @@
                 outputs.courseHours.innerText = courseHours;
                 
                 outputs.programTitle.innerText = nrInfo.programTitle;
-                outputs.programContent.innerHTML = nrInfo.programContentHTML(courseHours, selectedOption.text);
+                
+                // [NOVA LÓGICA] Conteúdo Personalizado
+                const customText = inputs.customContent.value.trim();
+                if (customText) {
+                    outputs.programContent.innerHTML = customText;
+                } else {
+                    outputs.programContent.innerHTML = nrInfo.programContentHTML(courseHours, selectedOption.text);
+                }
                 
                 // --- 4. Datas ---
                 outputs.courseStart.innerText = formatDate(inputs.courseStart.value);
@@ -1260,6 +1384,8 @@
                 
                 // --- 5. Responsáveis ---
                 outputs.instructorName.innerText = inputs.instructorName.value;
+                // [NOVO] Vincula nome do instrutor ao verso
+                outputs.instructorSigVerso.innerText = inputs.instructorName.value;
                 outputs.instructorQual.innerText = inputs.instructorQual.value;
                 outputs.rtName.innerText = inputs.rtName.value;
                 outputs.rtQual.innerText = inputs.rtQual.value;
@@ -1270,8 +1396,37 @@
             };
 
             /*
+             * [BLOCO 06] ATUALIZAÇÃO DE ESTILOS (VISUAL)
+            */
+            const syncVisualStyles = () => {
+                 const { styleInputs, outputs } = elements;
+                 
+                 // Título Principal
+                 updateStyle(outputs.companyName, 'fontFamily', styleInputs.fontFamilyTitle.value);
+                 updateStyle(outputs.companyName, 'fontSize', `${styleInputs.fontSizeTitle.value}pt`);
+
+                 // Nome do Aluno (Corpo e Assinaturas)
+                 updateStyle(outputs.studentName, 'fontFamily', styleInputs.fontFamilyStudent.value);
+                 updateStyle(outputs.studentName, 'fontSize', `${styleInputs.fontSizeStudent.value}pt`);
+                 
+                 // Corpo do Texto
+                 updateStyle(outputs.textBody, 'fontFamily', styleInputs.fontFamilyBody.value);
+                 // Aplica a todos os P do corpo
+                 const bodyParagraphs = document.querySelectorAll('.cert-body p');
+                 bodyParagraphs.forEach(p => {
+                     updateStyle(p, 'fontFamily', styleInputs.fontFamilyBody.value);
+                     updateStyle(p, 'fontSize', `${styleInputs.fontSizeBody.value}pt`);
+                 });
+
+                 // Fonte das Assinaturas
+                 const sigs = document.querySelectorAll('.sig-font-target');
+                 sigs.forEach(sig => {
+                     updateStyle(sig, 'fontFamily', styleInputs.fontFamilySig.value);
+                 });
+            };
+
+            /*
              * [BLOCO 07] VINCULAÇÃO DE EVENTOS (Listeners)
-             * (Sem alterações nesta etapa)
             */
             
             const originalTitle = document.title; 
@@ -1280,6 +1435,12 @@
                 if (input.type === 'file' || input.id === 'in-select-nr') return;
                 const eventType = (input.tagName === 'SELECT' || input.type === 'date') ? 'change' : 'keyup';
                 input.addEventListener(eventType, syncCertificateData);
+            });
+            
+            // Listeners de Estilo
+            Object.values(elements.styleInputs).forEach(input => {
+                const eventType = (input.tagName === 'SELECT') ? 'change' : 'input';
+                input.addEventListener(eventType, syncVisualStyles);
             });
             
             elements.inputs.selectNr.addEventListener('change', updateCourseOptions);
@@ -1294,8 +1455,10 @@
                 loadImages(e, [elements.outputs.watermarkFrente, elements.outputs.watermarkVerso]);
             });
             
+            // Botão de Imprimir
             elements.triggers.generateButton.addEventListener('click', () => {
                 syncCertificateData();
+                syncVisualStyles();
                 
                 try {
                     const nrKey = elements.inputs.selectNr.value.split('_')[0];
@@ -1311,6 +1474,28 @@
                 window.print();
             });
 
+            // Botão de Download HTML
+            elements.triggers.downloadButton.addEventListener('click', () => {
+                // Atualiza os atributos 'value' do HTML para que o arquivo baixado tenha os dados preenchidos
+                const inputs = document.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                   if (input.type !== 'file') {
+                       input.setAttribute('value', input.value);
+                       if (input.tagName === 'TEXTAREA') input.innerHTML = input.value;
+                   }
+                });
+
+                const htmlContent = document.documentElement.outerHTML;
+                const blob = new Blob([htmlContent], {type: 'text/html'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'gerador_certificados_backup.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
             window.onafterprint = () => {
                 document.title = originalTitle;
             };
@@ -1318,6 +1503,7 @@
             // --- INICIALIZAÇÃO DO SISTEMA ---
             populateNrSelect();
             updateCourseOptions();
+            syncVisualStyles();
         });
     </script>
 </body>
